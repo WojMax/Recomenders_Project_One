@@ -60,7 +60,7 @@ class DataPreprocessingToolkit(object):
         # Write your code here #
         ########################
         new_df = df.copy()
-        new_df = add_length_of_stay(new_df)
+        new_df['length_of_stay'] = (new_df['date_to'] - new_df['date_from']) + pd.Timedelta(days=1)
         new_df = new_df.loc[(new_df['length_of_stay'] <= pd.Timedelta(days=21))]
         return new_df
 
@@ -170,8 +170,8 @@ class DataPreprocessingToolkit(object):
         # Write your code here #
         ########################
         new_df = df.copy()
-        new_df = add_length_of_stay(new_df)
-        new_df = add_nrooms(new_df)
+        new_df['length_of_stay'] = (new_df['date_to'] - new_df['date_from'])+pd.Timedelta(days=1)
+        new_df['n_rooms'] = 1
         new_df['night_price'] = new_df['accommodation_price'] / (
                     (new_df['length_of_stay'] / pd.Timedelta(days=1)) * new_df['n_rooms'])
         return new_df
@@ -253,10 +253,10 @@ class DataPreprocessingToolkit(object):
         ########################
         # Write your code here #
         ########################
-        sum_df = group_reservations.groupby('group_id').agg({'self.sum_columns': 'sum'})
-        mean_df = group_reservations.groupby('group_id').agg({'self.mean_columns': 'mean'})
-        mode_df = group_reservations.groupby('group_id').apply(lambda x = group_reservations['self.mode_columns']: x.value_counts())
-        first_df = group_reservations.groupby('group_id').agg({'self.first_columns': 'first'})
+        sum_df = group_reservations.groupby('group_id').agg({'sum_columns': 'sum'})
+        mean_df = group_reservations.groupby('group_id').agg({'mean_columns': 'mean'})
+        mode_df = group_reservations.groupby('group_id').apply(lambda x = group_reservations['mode_columns']: x.value_counts())
+        first_df = group_reservations.groupby('group_id').agg({'first_columns': 'first'})
         merged_df = pd.merge(sum_df, pd.merge(mean_df,pd.merge(mode_df,first_df, on='group_id'), on='group_id'), on='group_id')
         concat_df = pd.concat([merged_df,non_group_reservations])
         return concat_df
